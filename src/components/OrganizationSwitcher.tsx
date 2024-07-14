@@ -31,7 +31,7 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
 >;
 
-interface OrganizationSwitcherProps extends PopoverTriggerProps {}
+interface OrganizationSwitcherProps extends PopoverTriggerProps { }
 
 export default function OrganizationSwitcher({
   className,
@@ -41,7 +41,7 @@ export default function OrganizationSwitcher({
   const [open, setOpen] = React.useState(false);
   const [showNewOrgDialog, setShowNewOrgDialog] = React.useState(false);
 
-  const { organizations, selectedOrganization, setSelectedOrganization } =
+  const { organizations, selectedOrganization, setSelectedOrganization, tenantServingURL } =
     React.useContext(OrganizationContext);
 
   const organizationOptions = organizations.map((org) => ({

@@ -15,7 +15,9 @@ const nextConfig = {
         "NEXT_PUBLIC_BILLING_HOST": process.env.NEXT_PUBLIC_BILLING_HOST,
         "NEXT_PUBLIC_ONBOARDING_HOST": process.env.NEXT_PUBLIC_ONBOARDING_HOST,
         "NEXT_PUBLIC_SAAS_TODOS_HOST": process.env.NEXT_PUBLIC_SAAS_TODOS_HOST,
+        "NEXT_PUBLIC_TM_HOST": process.env.NEXT_PUBLIC_TM_HOST,
         "INTEGRATED_MODE": process.env.INTEGRATED_MODE,
+        "APP_ID": 1,
     },
     output: 'standalone'
 };

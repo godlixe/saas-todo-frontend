@@ -109,7 +109,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
       .then((res) => {
         if (res.ok) {
           toast.success("Successfully Registered", {
-            description: "redirecting you to home page."
+            description: "redirecting you to login page."
           })
           router.push('/login');
         } else {
@@ -178,7 +178,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
       } : () => {
 
         const { sub, name, email, picture } = parseJwt(token);
-        setUserInfo({ user_id: "", name: name, email: email, sub: sub, picture: picture });
+        setUserInfo({ user_id: sub, name: name, email: email, sub: sub, picture: picture });
       }
 
       getMe()

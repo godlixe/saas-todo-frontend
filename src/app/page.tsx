@@ -20,12 +20,15 @@ import React from "react";
 import { OrganizationContext } from "@/providers/OrganizationProvider";
 import { TodoList } from "./components/Todo";
 import { redirect, usePathname, useRouter } from "next/navigation";
+import CreateTodoDialog from "@/components/CreateTodoDialog";
 
 export default function Home() {
-
+  const { userInfo } = useContext(AuthContext);
   const [publicTodos, setPublicTodos] = useState<Todo[]>([]);
   const [personalTodos, setPersonalTodos] = useState<Todo[]>([]);
   const router = useRouter();
+  const {  selectedOrganization, tenantServingURL } = useContext(OrganizationContext);
+  const [createTodoDialog, setCreateTodoDialog] = React.useState(false);
 
   type Todo = {
     id: number;
@@ -39,11 +42,12 @@ export default function Home() {
     const fetchTodos = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SAAS_TODOS_HOST}/todo`,
+          `${tenantServingURL}/todo`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")} `,
               "x-tenant-id": "e6a8e5db-326c-4ab6-a067-646f36927e29",
+              "x-user-id": userInfo?.user_id ?? "",
             }
           }
         );
@@ -55,19 +59,20 @@ export default function Home() {
       }
     };
 
-
     fetchTodos();
-  }, []);
+
+  }, [selectedOrganization, createTodoDialog, userInfo?.user_id, tenantServingURL]);
 
   useEffect(() => {
     const fetchPersonalTodos = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SAAS_TODOS_HOST}/todo?personal=1`,
+          `${tenantServingURL}/todo?personal=1`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")} `,
               "x-tenant-id": "e6a8e5db-326c-4ab6-a067-646f36927e29",
+              "x-user-id": userInfo?.user_id ?? "",
             }
           }
         );
@@ -78,12 +83,10 @@ export default function Home() {
       }
     };
 
-
     fetchPersonalTodos();
-  }, []);
 
-  const { userInfo } = useContext(AuthContext);
-  const { organizations } = useContext(OrganizationContext);
+  }, [selectedOrganization, createTodoDialog, userInfo?.user_id, tenantServingURL]);
+
 
   const [showNewOrgDialog, setShowNewOrgDialog] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -95,9 +98,25 @@ export default function Home() {
   }
 
 
+  if (tenantServingURL == "") {
+    return <>
+      <p className="font-normal">Organization does not have SaaS Todos</p>
+    </>
+  }
+
+
+
   return (
     <div>
       <div>
+        <div>
+          <CreateTodoDialog
+            showDialog={createTodoDialog}
+            setShowDialog={setCreateTodoDialog}
+          >
+          </CreateTodoDialog>
+
+        </div>
         <p className="p-5 pb-0 font-bold">
           Personal Todos
         </p>
@@ -109,7 +128,7 @@ export default function Home() {
               aspectRatio="square"
               width={150}
               height={150}
-              className="h-10"
+              className=""
             />
           ))}
         </div>
@@ -126,7 +145,7 @@ export default function Home() {
               aspectRatio="square"
               width={150}
               height={150}
-              className="h-10 w-1/2"
+              className=""
             />
           ))}
         </div>

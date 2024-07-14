@@ -48,65 +48,10 @@ export function TodoList({
   className,
   ...props
 }: AppProps) {
-  const { selectedOrganization, organizations } = useContext(OrganizationContext);
+  const { selectedOrganization, organizations, tenantServingURL } = useContext(OrganizationContext);
   const { userInfo } = useContext(AuthContext);
 
   const [isDialogOpen, setisDialogOpen] = useState<boolean>(false);
-
-  type Price = {
-    id: string | null;
-    price_value: number;
-    recurrence: string | null;
-  }
-
-  type BillingPrice = {
-    id: string | null;
-    price: number;
-    reccurence: string | null;
-  }
-
-
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       const response = await fetch(`${process.env.NEXT_PUBLIC_BILLING_HOST}/api/v1/products/${app.id}`);
-  //       const data = await response.json();
-
-  //       let products: Product[] = []
-  //       data.data.forEach((resProduct: BillingProductResponse) => {
-
-  //         let prices: Price[] = []
-
-  //         resProduct.price.forEach((resPrice: BillingPrice) => {
-  //           let price: Price = {
-  //             id: resPrice.id,
-  //             price_value: resPrice.price,
-  //             recurrence: resPrice.reccurence
-  //           }
-
-  //           prices.push(price);
-  //         });
-
-  //         let product: Product = {
-  //           id: resProduct.id,
-  //           app_id: resProduct.app_id,
-  //           app: null,
-  //           tier_name: resProduct.tier_name,
-  //           prices: prices,
-  //         }
-
-  //         products.push(product)
-  //       });
-
-  //       setProducts(products);
-
-  //     } catch (error) {
-  //       console.error("error fetching products: ", error);
-  //     }
-  //   }
-
-  //   if (isDialogOpen) fetchProducts();
-  // }, [isDialogOpen]);
 
   const handleChange = (open: boolean) => {
     setisDialogOpen(open)
@@ -125,16 +70,15 @@ export function TodoList({
     <>
       <Dialog onOpenChange={handleChange} open={isDialogOpen}>
         <DialogTrigger asChild>
-          <div className={cn("flex items-center space-x-4 h-50 hover:bg-gray-200 rounded-lg", className)} {...props}>
-            <div className="space-x-4 overflow-hidden rounded-sm">
-
+          <div className={cn("flex flex-col space-y-2 p-4 hover:bg-gray-200 rounded-lg", className)} {...props}>
+            <div className="flex justify-between items-center">
+              <h3 className="font-medium text-lg">{todo.name}</h3>
+              {todo.is_done && <div className="text-xl">✅</div>}
             </div>
-            <div className="text-sm">
-              <h3 className="font-medium leading-none">{todo.name}</h3>
+            <hr className="border-t border-gray-300 my-2" />
+            <div className="text-sm text-justify whitespace-pre-line">
+              {todo.content}
             </div>
-            {
-              todo.is_done && <p>✅</p>
-            }
           </div>
         </DialogTrigger>
         <DialogContent>

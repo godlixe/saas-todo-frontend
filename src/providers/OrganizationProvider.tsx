@@ -1,12 +1,9 @@
 "use client";
 
 import fetcher from "@/lib/fetcher";
-import { parseJwt } from "@/lib/parseJwt";
-import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { createContext, useEffect, useState, useContext } from "react";
 import useSWR from "swr";
-import { AuthContext } from "@/providers/AuthProvider";
 
 
 type Organization = {
@@ -17,6 +14,7 @@ type Organization = {
 type OrganizationContextType = {
   organizations: Organization[];
   selectedOrganization: Organization | null;
+  tenantServingURL: String | null;
   membershipLevel: "owner" | "manager" | "member" | null;
   setSelectedOrganization: React.Dispatch<
     React.SetStateAction<Organization | null>
@@ -26,6 +24,7 @@ type OrganizationContextType = {
 export const OrganizationContext = createContext<OrganizationContextType>({
   organizations: [],
   selectedOrganization: null,
+  tenantServingURL: null,
   membershipLevel: null,
   setSelectedOrganization: () => { },
 });
@@ -36,7 +35,7 @@ type Props = {
 
 const OrganizationProvider: React.FC<Props> = ({ children }) => {
   const { data, mutate } = useSWR("/organization", fetcher);
-  const organizations =(Array.isArray(data)) ?
+  const organizations = (Array.isArray(data)) ?
     data?.map((org: any) => {
       return {
         organizationId: org.organization_id,
@@ -46,6 +45,8 @@ const OrganizationProvider: React.FC<Props> = ({ children }) => {
 
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null);
+
+  const [tenantServingURL, setTenantServingURL] = useState('')
 
   const organizationId = selectedOrganization?.organizationId;
   const { data: membershipLevel } = useSWR(
@@ -61,7 +62,8 @@ const OrganizationProvider: React.FC<Props> = ({ children }) => {
       );
       setSelectedOrganization(newOrg || organizations[0]);
     }
-  }, [data]);
+  }, [data, organizations, selectedOrganization]);
+
 
   useEffect(() => {
     if (selectedOrganization) {
@@ -72,11 +74,43 @@ const OrganizationProvider: React.FC<Props> = ({ children }) => {
     }
   }, [selectedOrganization]);
 
+  useEffect(() => {
+    if (selectedOrganization == null) {
+      return
+    }
+
+    const fetchTodos = async () => {
+      try {
+        console.log(`${process.env.NEXT_PUBLIC_TM_HOST}/api/product/1/tenant/${selectedOrganization.organizationId}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_TM_HOST}/api/product/1/tenant/${selectedOrganization.organizationId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")} `,
+            },
+          },
+        );
+        const data = await response.json();
+        setTenantServingURL(data.data.resource_information.serving_url)
+        console.log("url : ", tenantServingURL);
+      } catch (error) {
+        setTenantServingURL("")
+        console.log("failed to fetch ", error)
+      };
+    };
+
+    fetchTodos();
+
+  }, [selectedOrganization, tenantServingURL]);
+
+
   return (
     <OrganizationContext.Provider
       value={{
         organizations,
         selectedOrganization,
+        tenantServingURL,
         membershipLevel: membershipLevel?.level || null,
         setSelectedOrganization,
       }}
